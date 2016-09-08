@@ -80,7 +80,6 @@ namespace TFS
                     foreach (Node node in project.IterationRootNodes)
                     {
                         ReleaseVersion releaseVersion = new ReleaseVersion(node.Name);
-                        releaseVersion.Iterations = GetIterations(projectName, node.Name);
                         result.ReleaseVersions.Add(releaseVersion);
                     }
 

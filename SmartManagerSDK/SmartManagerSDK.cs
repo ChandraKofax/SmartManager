@@ -39,12 +39,28 @@ namespace SmartManager
             return manager.GetAssignedWorkItems(tfsUrlPath, projectName, retrievalOptions, Query);
         }
 
+        /// <summary>
+        /// Gets the child tasks.
+        /// </summary>
+        /// <param name="sessionId">The session identifier.</param>
+        /// <param name="tfsUrlPath">The TFS URL path.</param>
+        /// <param name="projectName">Name of the project.</param>
+        /// <param name="ParentId">The parent identifier.</param>
+        /// <returns>ChildItem Collection</returns>
         public ChildItemCollection GetChildTasks(string sessionId, string tfsUrlPath, string projectName, string ParentId)
         {
             Manager2 manager = new Manager2();
             return manager.GetChildTasksDetails(tfsUrlPath, projectName, ParentId);
         }
 
+        /// <summary>
+        /// Gets the burn details.
+        /// </summary>
+        /// <param name="sessionId">The session identifier.</param>
+        /// <param name="tfsUrlPath">The TFS URL path.</param>
+        /// <param name="projectName">Name of the project.</param>
+        /// <param name="fieldFilter">The field filter.</param>
+        /// <returns>Burn Report</returns>
         public BurnReport GetBurnDetails(string sessionId, string tfsUrlPath, string projectName, FieldFilter fieldFilter)
         {
             Manager2 manager = new Manager2();
@@ -69,12 +85,25 @@ namespace SmartManager
             return manager.GetBurnDetails(tfsUrlPath, projectName, retrievalOptions, Query);
         }
 
+        /// <summary>
+        /// Gets the releases.
+        /// </summary>
+        /// <param name="tfsUrlPath">The TFS URL path.</param>
+        /// <param name="projectName">Name of the project.</param>
+        /// <returns>ReleaseVersion Collection</returns>
         public ReleaseVersionCollection GetReleases(string tfsUrlPath, string projectName)
         {
             Manager2 manager = new Manager2();
             return manager.GetReleases(tfsUrlPath, projectName);
         }
 
+        /// <summary>
+        /// Gets the iterations.
+        /// </summary>
+        /// <param name="tfsUrlPath">The TFS URL path.</param>
+        /// <param name="projectName">Name of the project.</param>
+        /// <param name="release">The release.</param>
+        /// <returns>Iteration Collection</returns>
         public IterationCollection GetIterations(string tfsUrlPath, string projectName, string release)
         {
             Manager2 manager = new Manager2();

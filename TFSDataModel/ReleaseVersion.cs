@@ -18,7 +18,5 @@ namespace DataModel
         }
 
         public string Release { get; set; }
-
-        public IterationCollection Iterations { get; set; }
     }
 }
