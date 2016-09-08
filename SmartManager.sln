@@ -1,0 +1,40 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2013
+VisualStudioVersion = 12.0.21005.1
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TFSManager", "TFSManager\TFSManager.csproj", "{A08BD313-0DB0-44D5-B03B-FBEBD2488566}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TFSDataModel", "TFSDataModel\TFSDataModel.csproj", "{701083AF-C6F9-4936-B382-2091C4EE56B2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SmartManagerWindows", "SmartManagerWindows\SmartManagerWindows.csproj", "{087D90DD-5374-4ADA-B8A4-80E676000311}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SmartManagerSDK", "SmartManagerSDK\SmartManagerSDK.csproj", "{90CB0D95-9C5D-4B39-AF82-F76859B827AB}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A08BD313-0DB0-44D5-B03B-FBEBD2488566}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A08BD313-0DB0-44D5-B03B-FBEBD2488566}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A08BD313-0DB0-44D5-B03B-FBEBD2488566}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A08BD313-0DB0-44D5-B03B-FBEBD2488566}.Release|Any CPU.Build.0 = Release|Any CPU
+		{701083AF-C6F9-4936-B382-2091C4EE56B2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{701083AF-C6F9-4936-B382-2091C4EE56B2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{701083AF-C6F9-4936-B382-2091C4EE56B2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{701083AF-C6F9-4936-B382-2091C4EE56B2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{087D90DD-5374-4ADA-B8A4-80E676000311}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{087D90DD-5374-4ADA-B8A4-80E676000311}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{087D90DD-5374-4ADA-B8A4-80E676000311}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{087D90DD-5374-4ADA-B8A4-80E676000311}.Release|Any CPU.Build.0 = Release|Any CPU
+		{90CB0D95-9C5D-4B39-AF82-F76859B827AB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{90CB0D95-9C5D-4B39-AF82-F76859B827AB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{90CB0D95-9C5D-4B39-AF82-F76859B827AB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{90CB0D95-9C5D-4B39-AF82-F76859B827AB}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
