@@ -32,7 +32,7 @@ namespace SmartManager
             Query = Query + GetStateWhereClause(fieldFilter);
             Query = Query + " AND [System.AssignedTo] IN ";
             Query = Query + GetAssignedToWhereClause(sessionId, fieldFilter, retrievalOptions);
-            Query = Query + GetIterationPathWhereClause(fieldFilter);
+            Query = Query + GetIterationPathWhereClause(projectName, fieldFilter);
 
             Query = Query + " ORDER BY [System.Id] ";
 
@@ -241,7 +241,7 @@ namespace SmartManager
         /// </summary>
         /// <param name="fieldFilter">The field filter.</param>
         /// <returns></returns>
-        private static string GetIterationPathWhereClause(FieldFilter fieldFilter)
+        private static string GetIterationPathWhereClause(string projectName, FieldFilter fieldFilter)
         {
             string iterationPathClause = " ";
 
@@ -249,7 +249,7 @@ namespace SmartManager
             {
                 //TODO If it is Group need to get the group members from TA SDK API.
 
-                string iterationPath = fieldFilter.Release + "\\" +fieldFilter.Iteration;
+                string iterationPath = projectName + "\\" + fieldFilter.Release + "\\" + fieldFilter.Iteration;
                 // Individual resource we can use directly as below.
                 iterationPathClause = iterationPathClause + string.Format("AND  [System.IterationPath] = '{0}'", iterationPath);
             }

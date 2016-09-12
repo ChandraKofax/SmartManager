@@ -18,7 +18,5 @@ namespace DataModel
         }
 
         public string IterationPath { get; set; }
-
-        public string Release { get; set; }
     }
 }
