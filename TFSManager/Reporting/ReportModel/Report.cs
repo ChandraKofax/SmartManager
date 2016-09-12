@@ -11,6 +11,10 @@ namespace TFS.Reporting
         private ViewType CurrentViewType { get; set; }
         public List<Item> AllItems { get; set; }
 
+        //Naresh Code
+        public List<ResourceBurnDetails> ResourceBurnDetails { get; set; }
+        //End of Naresh Code
+
         private int storiesCount;
         public int StoriesCount { get { return storiesCount; } }
 
@@ -39,6 +43,11 @@ namespace TFS.Reporting
         public Report()
         {
             this.RawData = new List<Item>();
+
+            //Naresh Code
+            ResourceBurnDetails = new List<ResourceBurnDetails>();
+            //End of Naresh Code
+
             AllItems = new List<Item>();
             burn = new EffortReportingEntity();
             bugBurn = new EffortReportingEntity();

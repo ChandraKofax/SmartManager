@@ -256,6 +256,40 @@ namespace TFS.Model
             return toString;
         }
 
+        public void GetResourceBDTString(ResourceBurnDetails ResourceBurnDetails)
+        {
+            string toString = ToString();
+            List<Effort> burn = GetBurn(ItemBroadType.None, ActivityType.None);
+            List<Effort> deviation = GetDeviation();
+            List<Effort> timeSpent = GetTimeSpent();
+            double totalBurn = burn.Sum(b => b.EffortInHr);
+            double totalDeviation = deviation.Sum(d => d.EffortInHr);
+            double totalTimeSpent = timeSpent.Sum(t => t.EffortInHr);
+            int subStories = Children.Count(s => s.Type == ItemType.OutOfScope || s.Type == ItemType.TechnicalDebt || s.Type == ItemType.UserStory || s.Type == ItemType.Feature);
+            toString += string.Format(" Burn:{0}, Deviation:{1}, Progress on plan:{2}, Time spent:{3} ",
+                new object[] { 
+                            Utilities.GetEffortString(totalBurn, 
+                                            burn.Where(i => i.Activity == ActivityType.Development).ToList().Sum(e => e.EffortInHr),
+                                            burn.Where(i => i.Activity == ActivityType.Testing).ToList().Sum(e => e.EffortInHr),
+                                            burn.Where(i => i.Activity == ActivityType.Documentation).ToList().Sum(e => e.EffortInHr)),
+                            Utilities.GetEffortString(totalDeviation, 
+                                            deviation.Where(i => i.Activity == ActivityType.Development).ToList().Sum(e => e.EffortInHr),
+                                            deviation.Where(i => i.Activity == ActivityType.Testing).ToList().Sum(e => e.EffortInHr),
+                                            deviation.Where(i => i.Activity == ActivityType.Documentation).ToList().Sum(e => e.EffortInHr)),
+                            totalBurn-totalDeviation,
+                            Utilities.GetEffortString(totalTimeSpent, 
+                                            timeSpent.Where(i => i.Activity == ActivityType.Development).ToList().Sum(e => e.EffortInHr),
+                                            timeSpent.Where(i => i.Activity == ActivityType.Testing).ToList().Sum(e => e.EffortInHr),
+                                            timeSpent.Where(i => i.Activity == ActivityType.Documentation).ToList().Sum(e => e.EffortInHr)),
+                });
+
+            ResourceBurnDetails.Burn = totalBurn;
+            ResourceBurnDetails.Deviation = totalDeviation;
+            ResourceBurnDetails.ProgressOnPlan = totalBurn - totalDeviation;
+            ResourceBurnDetails.TimeSpent = totalTimeSpent;
+            ResourceBurnDetails.Summary = toString;
+        }
+
         public override string ToString()
         {
             string toString = string.Empty;

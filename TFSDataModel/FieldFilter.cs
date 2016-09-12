@@ -33,6 +33,14 @@ namespace DataModel
         public string Iteration { get; set; }
 
         /// <summary>
+        /// Gets or sets the release.
+        /// </summary>
+        /// <value>
+        /// The release.
+        /// </value>
+        public string Release { get; set; }
+
+        /// <summary>
         /// Gets or sets the assigned to.
         /// </summary>
         /// <value>

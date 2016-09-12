@@ -4,6 +4,7 @@ using TFS.WiQl;
 using TFS.Reporting;
 using System.Linq;
 using System.Collections.Generic;
+using TFS.Model;
 
 namespace TFS
 {
@@ -46,9 +47,26 @@ namespace TFS
 
             this.PopulateFilterData(filter);
             QueryResult result = server.Execute(QueryStore.GetBurnQuery(filter, Query), filter.DateRange, true);
-            BurnReport burnreport = reportEngine.CompileBurnData(result, filter, tfsUrlPath, projectName);
-            burnreport.SetView(ViewType.Resource, filter.Team.Members);
-            return burnreport;
+            BurnReport burnReport = reportEngine.CompileBurnData(result, filter, tfsUrlPath, projectName);
+
+            //Naresh Code
+            ViewType currentViewType = ViewType.Resource;
+
+            if (burnReport != null)
+            {
+                burnReport.SetView(currentViewType, filter.Team.Members);
+            }
+
+            foreach (Item item in burnReport.AllItems)
+            {
+                ResourceBurnDetails resBurnDetails = new DataModel.ResourceBurnDetails();
+                item.GetResourceBDTString(resBurnDetails);
+                burnReport.ResourceBurnDetails.Add(resBurnDetails);
+            }
+
+            return burnReport;
+
+            //End of Naresh Code
         }
 
         public IterationCollection GetIterations(string tfsUrlPath, string projectName, string release)
@@ -59,7 +77,7 @@ namespace TFS
 
         public ReleaseVersionCollection GetReleases(string tfsUrlPath, string projectName)
         {
-            this.Connect(tfsUrlPath, projectName);
+            this.Connect(tfsUrlPath, projectName);         
             return server.GetReleases(projectName);
         }
 
@@ -117,7 +135,5 @@ namespace TFS
                 filter.DateRange = durationFilter;
             }
         }
-
-
     }
 }

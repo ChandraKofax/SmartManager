@@ -216,8 +216,6 @@ namespace SmartManager
                     if (reesourceSummaryCollection != null && reesourceSummaryCollection.Count > 0)
                     {
                         assignedToClause = assignedToClause + string.Format("({0})", BuildResourceString(reesourceSummaryCollection));
-
-                        
                     }
                 }
                 else
@@ -247,12 +245,13 @@ namespace SmartManager
         {
             string iterationPathClause = " ";
 
-            if (!string.IsNullOrEmpty(fieldFilter.Iteration))
+            if (!string.IsNullOrEmpty(fieldFilter.Iteration) && !string.IsNullOrEmpty(fieldFilter.Release))
             {
                 //TODO If it is Group need to get the group members from TA SDK API.
 
+                string iterationPath = fieldFilter.Release + "\\" +fieldFilter.Iteration;
                 // Individual resource we can use directly as below.
-                iterationPathClause = iterationPathClause + string.Format("AND  [System.IterationPath] = '{0}'", fieldFilter.Iteration);
+                iterationPathClause = iterationPathClause + string.Format("AND  [System.IterationPath] = '{0}'", iterationPath);
             }
 
             return iterationPathClause;
