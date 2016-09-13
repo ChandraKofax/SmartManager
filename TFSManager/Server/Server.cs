@@ -46,12 +46,11 @@ namespace TFS
             return executor.Execute(workItemStore, query, durationFilter, dayPrecision);
         }
 
-        public QueryResult GetWIFeatureGroup()
+        public Microsoft.TeamFoundation.WorkItemTracking.Client.WorkItem GetWorkItem(int workItemID)
         {
             Validate();
-            Microsoft.TeamFoundation.WorkItemTracking.Client.WorkItem wiFeatureGroup = workItemStore.GetWorkItem(742678);
-
-            return null;
+            Microsoft.TeamFoundation.WorkItemTracking.Client.WorkItem workItem = workItemStore.GetWorkItem(workItemID);
+            return workItem;
         }
 
         private void ResetDetails()
@@ -70,10 +69,22 @@ namespace TFS
             }
         }
 
+        public DataModel.ProjectCollection GetProjects()
+        {
+            DataModel.ProjectCollection result = new DataModel.ProjectCollection();
+            foreach (Microsoft.TeamFoundation.WorkItemTracking.Client.Project project in workItemStore.Projects)
+            {
+                DataModel.Project internalProject = new DataModel.Project(project.Name);
+                result.Projects.Add(internalProject);
+            }
+
+            return result;
+        }
+
         public ReleaseVersionCollection GetReleases(string projectName)
         {
             ReleaseVersionCollection result = new ReleaseVersionCollection();
-            foreach (Project project in workItemStore.Projects)
+            foreach (Microsoft.TeamFoundation.WorkItemTracking.Client.Project project in workItemStore.Projects)
             {
                 if (string.Compare(project.Name, projectName, true) != -1)
                 {
@@ -93,7 +104,7 @@ namespace TFS
         public IterationCollection GetIterations(string projectName, string release)
         {
             IterationCollection result = new IterationCollection();
-            foreach (Project project in workItemStore.Projects)
+            foreach (Microsoft.TeamFoundation.WorkItemTracking.Client.Project project in workItemStore.Projects)
             {
                 if (string.Compare(project.Name, projectName, true) != -1)
                 {

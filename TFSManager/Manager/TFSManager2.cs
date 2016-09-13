@@ -37,7 +37,8 @@ namespace TFS
         {
             this.Connect(tfsUrlPath, projectName);
             QueryResult result = server.Execute(QueryStore.GetChildTasksQuery(parentId), null, false);
-            ChildItemCollection ChildItemCollection = reportEngine.CompileChildTasks(result, tfsUrlPath, projectName);
+            Microsoft.TeamFoundation.WorkItemTracking.Client.WorkItem workItem = server.GetWorkItem(Convert.ToInt32(parentId));
+            ChildItemCollection ChildItemCollection = reportEngine.CompileChildTasks(result, tfsUrlPath, projectName, workItem);
             return ChildItemCollection;
         }
 
@@ -69,11 +70,18 @@ namespace TFS
             //End of Naresh Code
         }
 
+        public ProjectCollection GetProjects(string tfsUrlPath)
+        {
+            this.Connect(tfsUrlPath, "");
+            return server.GetProjects();
+        }
+
         public IterationCollection GetIterations(string tfsUrlPath, string projectName, string release)
         {
             this.Connect(tfsUrlPath, projectName);
             return server.GetIterations(projectName, release);
         }
+
 
         public ReleaseVersionCollection GetReleases(string tfsUrlPath, string projectName)
         {

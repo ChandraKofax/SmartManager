@@ -283,6 +283,7 @@ namespace TFS.Model
                                             timeSpent.Where(i => i.Activity == ActivityType.Documentation).ToList().Sum(e => e.EffortInHr)),
                 });
 
+            ResourceBurnDetails.ResourceName = Title;
             ResourceBurnDetails.Burn = totalBurn;
             ResourceBurnDetails.Deviation = totalDeviation;
             ResourceBurnDetails.ProgressOnPlan = totalBurn - totalDeviation;

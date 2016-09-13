@@ -11,6 +11,12 @@ namespace SmartManager
 {
     public class SmartManagerSDK
     {
+        public ProjectCollection GetProjects(string tfsUrlPath)
+        {
+            Manager2 manager = new Manager2();
+            return manager.GetProjects(tfsUrlPath);
+        }
+
         /// <summary>
         /// Gets the assigned work items.
         /// </summary>

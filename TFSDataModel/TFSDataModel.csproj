@@ -50,9 +50,11 @@
   <ItemGroup>
     <Compile Include="BurnDetails.cs" />
     <Compile Include="BurnRetrievalOptions.cs" />
+    <Compile Include="Project.cs" />
     <Compile Include="WorkItem.cs" />
     <Compile Include="ChildItem.cs" />
     <Compile Include="Iteration.cs" />
+    <Compile Include="ProjectCollection.cs" />
     <Compile Include="WorkItemCollection.cs" />
     <Compile Include="IterationCollection.cs" />
     <Compile Include="ChildItemCollection.cs" />

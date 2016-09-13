@@ -131,8 +131,11 @@ namespace TFS.Reporting
         /// <param name="taskUpdatesQueryResult">The task updates query result.</param>
         /// <param name="tfsUrlPath">The TFS URL path.</param>
         /// <param name="projectName">Name of the project.</param>
-        /// <returns>ChildItem Collection</returns>
-        public ChildItemCollection CompileChildTasks(QueryResult taskUpdatesQueryResult, string tfsUrlPath, string projectName)
+        /// <param name="workItem">The work item.</param>
+        /// <returns>
+        /// ChildItem Collection
+        /// </returns>
+        public ChildItemCollection CompileChildTasks(QueryResult taskUpdatesQueryResult, string tfsUrlPath, string projectName, Microsoft.TeamFoundation.WorkItemTracking.Client.WorkItem parentWorkItem)
         {
             Report childTasksReport = new Report();
             ChildItemCollection childItemCollection = new ChildItemCollection();
@@ -172,6 +175,42 @@ namespace TFS.Reporting
                         }
                     }
                 }
+            }
+
+            if (parentWorkItem != null && parentWorkItem.Type != null && parentWorkItem.Type.Name == "Task")
+            {
+                ChildItem childItem = new ChildItem();
+                childItem.ItemId = parentWorkItem.Id;
+                childItem.IterationPath = parentWorkItem.IterationPath;
+                childItem.State = parentWorkItem.State;
+                childItem.Title = parentWorkItem.Title;
+
+                Field assignedToField = parentWorkItem.Fields[TFSLiterals.AssignedTo];
+                childItem.AssignedTo = (string)assignedToField.Value;
+
+                Field workItemTypeField = parentWorkItem.Fields[TFSLiterals.WorkItemType];
+                childItem.WorkItemType = (string)workItemTypeField.Value;
+
+                if (parentWorkItem.Fields.Contains(TFSLiterals.CompletedWork))
+                {
+                    Field completedWorkfield = parentWorkItem.Fields[TFSLiterals.CompletedWork];
+                    childItem.TaskEffortDetails.CompletedWork = (double)completedWorkfield.Value;
+                }
+
+                if (parentWorkItem.Fields.Contains(TFSLiterals.RemainingWork))
+                {
+                    Field remainingWorkfield = parentWorkItem.Fields[TFSLiterals.RemainingWork];
+                    childItem.TaskEffortDetails.RemainingWork = (double)remainingWorkfield.Value;
+                }
+
+                if (parentWorkItem.Fields.Contains(TFSLiterals.OriginalEstimate))
+                {
+                    Field OriginalWorkfield = parentWorkItem.Fields[TFSLiterals.OriginalEstimate];
+                    childItem.TaskEffortDetails.OriginalEstimate = (double)OriginalWorkfield.Value;
+                }
+
+                childItem.WorkItemUrl = tfsUrlPath + "/" + projectName + "/_workitems#_a=edit&id=" + parentWorkItem.Id;
+                childItemCollection.ChildItems.Add(childItem);
             }
 
             return childItemCollection;

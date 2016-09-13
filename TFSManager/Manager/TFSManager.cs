@@ -44,12 +44,12 @@ namespace TFS
             return WorkItems;
         }
 
-        public QueryResult GetWIFeatureGroup()
-        {
-            QueryResult result = server.GetWIFeatureGroup();
+        //public QueryResult GetWIFeatureGroup()
+        //{
+        //    QueryResult result = server.GetWIFeatureGroup();
 
-            return result;
-        }
+        //    return result;
+        //}
 
         public Report GetCauseAndResolutionIssueDetails(BurnRetrievalOptions filter)
         {
