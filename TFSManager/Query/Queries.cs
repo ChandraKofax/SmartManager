@@ -90,6 +90,14 @@ namespace TFS.WiQl
            "([System.Links.LinkType] = 'System.LinkTypes.Hierarchy-Forward') And [Target].[System.WorkItemType] = 'Task' AND [Source].[System.Id] IN ({0}) " +
            "ORDER BY [System.Id] mode(MustContain))" + "ORDER BY [System.Id] ";
 
+        private static readonly string ListOfWorkItemsQuery =
+           "SELECT [System.Id], [System.Links.LinkType], [System.WorkItemType], [System.Title], [System.AssignedTo], [System.State] " +
+           "FROM WorkItemLinks " +
+           "WHERE " +
+           "[Source].[System.TeamProject] = @project AND  " +
+           "[Target].[System.WorkItemType] = 'Task' AND [Target].[System.Id] IN ({0}) " +
+           "ORDER BY [System.Id] mode(MustContain)";
+
         internal static TFSQuery GetBurnQueryOLD(BurnRetrievalOptions filter)
         {
             string burnQuery = string.Format(BurnDetailsQuery, BuildResourceString(filter), BuildRemovedTasksString(filter), BuildSprintString(filter));
@@ -124,6 +132,14 @@ namespace TFS.WiQl
             query.Context.Add("project", "KTA");
             return query;
         }
+
+        internal static TFSQuery GetListOfWorkItemsQuery(string[] workItemIds)
+        {
+            string childTasksQuery = string.Format(ListOfWorkItemsQuery, BuildWorkItemIdsString(workItemIds));
+            TFSQuery query = new TFSQuery { QueryString = childTasksQuery };
+            query.Context.Add("project", "KTA");
+            return query;
+        }       
 
         internal static TFSQuery GetBugResolutionDataQuery(BurnRetrievalOptions filter)
         {
@@ -201,6 +217,30 @@ namespace TFS.WiQl
                 firstTime = false;
             }
             return resourceString;
+        }
+
+        private static string BuildWorkItemIdsString(string[] workItemIds)
+        {
+            string listOfWorkItemIds = string.Empty;
+            if (workItemIds != null && workItemIds.Length > 0)
+            {
+                bool firstTime = true;
+                foreach (var item in workItemIds)
+                {
+                    if (!firstTime)
+                    {
+                        listOfWorkItemIds += "," + item;
+                    }
+                    else
+                    {
+                        listOfWorkItemIds = listOfWorkItemIds + item;
+                    }
+
+                    firstTime = false;
+                }
+            }
+
+            return listOfWorkItemIds;
         }
     }
 }

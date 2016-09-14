@@ -18,6 +18,31 @@ namespace SmartManager
         }
 
         /// <summary>
+        /// Gets the releases.
+        /// </summary>
+        /// <param name="tfsUrlPath">The TFS URL path.</param>
+        /// <param name="projectName">Name of the project.</param>
+        /// <returns>ReleaseVersion Collection</returns>
+        public ReleaseVersionCollection GetReleases(string tfsUrlPath, string projectName)
+        {
+            Manager2 manager = new Manager2();
+            return manager.GetReleases(tfsUrlPath, projectName);
+        }
+
+        /// <summary>
+        /// Gets the iterations.
+        /// </summary>
+        /// <param name="tfsUrlPath">The TFS URL path.</param>
+        /// <param name="projectName">Name of the project.</param>
+        /// <param name="release">The release.</param>
+        /// <returns>Iteration Collection</returns>
+        public IterationCollection GetIterations(string tfsUrlPath, string projectName, string release)
+        {
+            Manager2 manager = new Manager2();
+            return manager.GetIterations(tfsUrlPath, projectName, release);
+        }
+
+        /// <summary>
         /// Gets the assigned work items.
         /// </summary>
         /// <param name="sessionId">The session identifier.</param>
@@ -92,28 +117,16 @@ namespace SmartManager
         }
 
         /// <summary>
-        /// Gets the releases.
+        /// Gets the list of work items.
         /// </summary>
         /// <param name="tfsUrlPath">The TFS URL path.</param>
         /// <param name="projectName">Name of the project.</param>
-        /// <returns>ReleaseVersion Collection</returns>
-        public ReleaseVersionCollection GetReleases(string tfsUrlPath, string projectName)
+        /// <param name="workItemIds">The work item ids.</param>
+        /// <returns>ChildItem Collection</returns>
+        public ChildItemCollection GetListOfWorkItems(string tfsUrlPath, string projectName, string[] workItemIds)
         {
             Manager2 manager = new Manager2();
-            return manager.GetReleases(tfsUrlPath, projectName);
-        }
-
-        /// <summary>
-        /// Gets the iterations.
-        /// </summary>
-        /// <param name="tfsUrlPath">The TFS URL path.</param>
-        /// <param name="projectName">Name of the project.</param>
-        /// <param name="release">The release.</param>
-        /// <returns>Iteration Collection</returns>
-        public IterationCollection GetIterations(string tfsUrlPath, string projectName, string release)
-        {
-            Manager2 manager = new Manager2();
-            return manager.GetIterations(tfsUrlPath, projectName, release);
+            return manager.GetListOfWorkItems(tfsUrlPath, projectName, workItemIds);
         }
 
         #region Where Clause       

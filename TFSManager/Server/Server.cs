@@ -3,10 +3,16 @@ using Microsoft.TeamFoundation.Client;
 using Microsoft.TeamFoundation.Framework.Common;
 using Microsoft.TeamFoundation.WorkItemTracking.Client;
 using System;
+using System.Linq;
 using System.Collections.Generic;
 using TFS.Execution;
 using TFS.WiQl;
 using System.Collections;
+using Microsoft.TeamFoundation.Server;
+using System.Xml;
+using System.Xml.Serialization;
+using System.IO;
+using System.Xml.Linq;
 
 namespace TFS
 {
@@ -19,6 +25,7 @@ namespace TFS
         private TfsTeamProjectCollection tpc;
         private string projectName;
         private List<WorkItemLinkType> linkTypes;
+        private ICommonStructureService4 css4;
 
         public Server(Uri tfsUrl, string projectName, System.Net.ICredentials credentials)
         {
@@ -33,6 +40,7 @@ namespace TFS
                 linkTypes = new List<WorkItemLinkType>(workItemStore.WorkItemLinkTypes);
                 this.executor = new TFS.Execution.Executor();
                 this.isValid = true;
+                css4 = tpc.GetService<ICommonStructureService4>();
             }
             catch
             {
@@ -51,6 +59,13 @@ namespace TFS
             Validate();
             Microsoft.TeamFoundation.WorkItemTracking.Client.WorkItem workItem = workItemStore.GetWorkItem(workItemID);
             return workItem;
+        }
+
+        public Microsoft.TeamFoundation.WorkItemTracking.Client.WorkItemCollection GetListOfWorkItems(TFSQuery query)
+        {
+            Validate();
+            Microsoft.TeamFoundation.WorkItemTracking.Client.WorkItemCollection workItems = workItemStore.Query(query.QueryString);
+            return workItems;
         }
 
         private void ResetDetails()
@@ -86,7 +101,7 @@ namespace TFS
             ReleaseVersionCollection result = new ReleaseVersionCollection();
             foreach (Microsoft.TeamFoundation.WorkItemTracking.Client.Project project in workItemStore.Projects)
             {
-                if (string.Compare(project.Name, projectName, true) != -1)
+                if (project.Name.Equals(projectName))
                 {
                     foreach (Node node in project.IterationRootNodes)
                     {
@@ -104,10 +119,43 @@ namespace TFS
         public IterationCollection GetIterations(string projectName, string release)
         {
             IterationCollection result = new IterationCollection();
+            Hashtable projectDatesHash = new Hashtable();
             foreach (Microsoft.TeamFoundation.WorkItemTracking.Client.Project project in workItemStore.Projects)
             {
-                if (string.Compare(project.Name, projectName, true) != -1)
+                if (project.Name.Equals(projectName))
                 {
+                    NodeInfo[] structures = css4.ListStructures(project.Uri.ToString());
+                    NodeInfo iterations = structures.FirstOrDefault(n => n.StructureType.Equals("ProjectLifecycle"));
+
+                    if (iterations != null)
+                    {
+                        //XmlElement iterationsTree = css4.GetNodesXml(new[] { iterations.Uri }, true);
+                        //XmlNodeList nodeList = iterationsTree.ChildNodes;
+                        //XElement doc = XElement.Parse(nodeList[0].InnerXml);
+
+                        //IEnumerable<XElement> elements = from node in doc.Elements("Node")
+                        //                                 select node;
+
+                        //int nodesCount = elements.Count();
+                        //foreach (XElement element in elements)
+                        //{
+                        //    IEnumerable<XElement> fields = from field in element.Elements() select field;
+                        //    foreach (XElement field in fields)
+                        //    {
+                        //        IEnumerable<XElement> projectdetails = from detail in field.Elements() select detail;
+                        //        foreach (XElement detail in projectdetails)
+                        //        {
+                        //            try
+                        //            {
+                        //                Iteration iteration = new Iteration(item.Name);
+                        //                result.Iterations.Add(detail.Attribute("Name").Value, new IterationDates(detail.Attribute("StartDate").Value, detail.Attribute("FinishDate").Value));
+                        //            }
+                        //            catch { }
+                        //        }
+                        //    }
+                        //}
+                    }
+
                     foreach (Node node in project.IterationRootNodes)
                     {
                         if (release == node.Name)

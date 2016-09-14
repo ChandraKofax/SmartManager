@@ -82,6 +82,96 @@ namespace TFS.Reporting
         }
 
         /// <summary>
+        /// Compiles the child tasks.
+        /// </summary>
+        /// <param name="taskUpdatesQueryResult">The task updates query result.</param>
+        /// <param name="tfsUrlPath">The TFS URL path.</param>
+        /// <param name="projectName">Name of the project.</param>
+        /// <param name="workItem">The work item.</param>
+        /// <returns>
+        /// ChildItem Collection
+        /// </returns>
+        public ChildItemCollection CompileChildTasks(QueryResult taskUpdatesQueryResult, string tfsUrlPath, string projectName, Microsoft.TeamFoundation.WorkItemTracking.Client.WorkItem parentWorkItem)
+        {
+            ChildItemCollection childItemCollection = new ChildItemCollection();
+
+            foreach (var workItemNode in taskUpdatesQueryResult.Result)
+            {
+                if (workItemNode.Children != null && workItemNode.Children.Count > 0)
+                {
+                    foreach (WorkItemNode childWorkItemNode in workItemNode.Children)
+                    {
+                        Microsoft.TeamFoundation.WorkItemTracking.Client.WorkItem workItem = childWorkItemNode.Item;
+                        if (Convert.ToString(workItemNode.Item.Fields[TFSLiterals.AssignedTo].Value) == Convert.ToString(workItem.Fields[TFSLiterals.AssignedTo].Value))
+                        {
+                            ChildItem childItem = GetChildItem(tfsUrlPath, projectName, workItem);
+                            childItemCollection.ChildItems.Add(childItem);
+                        }
+                    }
+                }
+            }
+
+            //// if we search only the Tasks it should return the same task as child item with detail info.
+            if (parentWorkItem != null && parentWorkItem.Type != null && parentWorkItem.Type.Name == "Task")
+            {
+                ChildItem childItem = GetChildItem(tfsUrlPath, projectName, parentWorkItem);
+                childItemCollection.ChildItems.Add(childItem);
+            }
+
+            return childItemCollection;
+        }
+
+        /// <summary>
+        /// Compiles the list of work items.
+        /// </summary>
+        /// <param name="tfsUrlPath">The TFS URL path.</param>
+        /// <param name="projectName">Name of the project.</param>
+        /// <param name="queryResult">The query result.</param>
+        /// <returns>Child Item Collection</returns>
+        public ChildItemCollection CompileListOfWorkItems(string tfsUrlPath, string projectName, QueryResult queryResult)
+        {
+            ChildItemCollection childItemCollection = new ChildItemCollection();
+
+            foreach (var workItemNode in queryResult.Result)
+            {
+                foreach (WorkItemNode childWorkItemNode in workItemNode.Children)
+                {
+                    Microsoft.TeamFoundation.WorkItemTracking.Client.WorkItem workItem = childWorkItemNode.Item;
+                    ChildItem childItem = GetChildItem(tfsUrlPath, projectName, workItem);
+                    childItemCollection.ChildItems.Add(childItem);
+                }
+            }
+
+            return childItemCollection;
+        }
+
+        /// <summary>
+        /// Compiles the resolved or closed bugs.
+        /// </summary>
+        /// <param name="bugsResolvedQueryResult">The bugs resolved query result.</param>
+        /// <param name="bugsClosedQueryResult">The bugs closed query result.</param>
+        /// <param name="filter">The filter.</param>
+        /// <returns>Report Class</returns>
+        public Report CompileResolvedOrClosedBugs(QueryResult bugsResolvedQueryResult, QueryResult bugsClosedQueryResult, BurnRetrievalOptions filter)
+        {
+            Report bugsResolvedOrClosedReport = new Report();
+            foreach (var workItem in bugsResolvedQueryResult.Result)
+            {
+                var reportingItem = Reporting.ReportFactory.CreateItem(workItem);
+                bugsResolvedOrClosedReport.AllItems.Add(reportingItem);
+            }
+
+            foreach (var workItem in bugsClosedQueryResult.Result)
+            {
+                var reportingItem = Reporting.ReportFactory.CreateItem(workItem);
+                bugsResolvedOrClosedReport.AllItems.Add(reportingItem);
+            }
+
+            bugsResolvedOrClosedReport.FinalizeReport();
+            return bugsResolvedOrClosedReport;
+        }
+
+        /// <summary>
         /// Compiles the cause and resolution issues.
         /// </summary>
         /// <param name="bugFixUpdatesQueryResult">The bug fix updates query result.</param>
@@ -93,7 +183,7 @@ namespace TFS.Reporting
             foreach (var workItem in bugFixUpdatesQueryResult.Result)
             {
                 var reportingItem = (Bug)Reporting.ReportFactory.CreateItem(workItem);
-                if(reportingItem.IsCauseResolutionDetailsMissing())
+                if (reportingItem.IsCauseResolutionDetailsMissing())
                 {
                     causeAndResolutionIssueReport.AllItems.Add(reportingItem);
                 }
@@ -125,121 +215,50 @@ namespace TFS.Reporting
             return taskUpdateIssuesReport;
         }
 
+        #region private        
         /// <summary>
-        /// Compiles the child tasks.
+        /// Gets the child item.
         /// </summary>
-        /// <param name="taskUpdatesQueryResult">The task updates query result.</param>
         /// <param name="tfsUrlPath">The TFS URL path.</param>
         /// <param name="projectName">Name of the project.</param>
         /// <param name="workItem">The work item.</param>
-        /// <returns>
-        /// ChildItem Collection
-        /// </returns>
-        public ChildItemCollection CompileChildTasks(QueryResult taskUpdatesQueryResult, string tfsUrlPath, string projectName, Microsoft.TeamFoundation.WorkItemTracking.Client.WorkItem parentWorkItem)
+        /// <returns>Child Item</returns>
+        private static ChildItem GetChildItem(string tfsUrlPath, string projectName, Microsoft.TeamFoundation.WorkItemTracking.Client.WorkItem workItem)
         {
-            Report childTasksReport = new Report();
-            ChildItemCollection childItemCollection = new ChildItemCollection();
+            ChildItem childItem = new ChildItem();
+            childItem.ItemId = workItem.Id;
+            childItem.IterationPath = workItem.IterationPath;
+            childItem.State = workItem.State;
+            childItem.Title = workItem.Title;
 
-            foreach (var workItemNode in taskUpdatesQueryResult.Result)
+            Field assignedToField = workItem.Fields[TFSLiterals.AssignedTo];
+            childItem.AssignedTo = (string)assignedToField.Value;
+
+            Field workItemTypeField = workItem.Fields[TFSLiterals.WorkItemType];
+            childItem.WorkItemType = (string)workItemTypeField.Value;
+
+            if (workItem.Fields.Contains(TFSLiterals.CompletedWork))
             {
-                if (workItemNode.Children != null && workItemNode.Children.Count > 0)
-                {
-                    foreach (WorkItemNode childWorkItemNode in workItemNode.Children)
-                    {
-                        Microsoft.TeamFoundation.WorkItemTracking.Client.WorkItem workItem = childWorkItemNode.Item;
-                        if (Convert.ToString(workItemNode.Item.Fields[TFSLiterals.AssignedTo].Value) == Convert.ToString(workItem.Fields[TFSLiterals.AssignedTo].Value))
-                        {
-                            ChildItem childItem = new ChildItem();
-                            childItem.ItemId = workItem.Id;
-                            childItem.IterationPath = workItem.IterationPath;
-                            childItem.State = workItem.State;
-                            childItem.Title = workItem.Title;
-
-                            Field assignedToField = workItem.Fields[TFSLiterals.AssignedTo];
-                            childItem.AssignedTo = (string)assignedToField.Value;
-
-                            Field workItemTypeField = workItem.Fields[TFSLiterals.WorkItemType];
-                            childItem.WorkItemType = (string)workItemTypeField.Value;
-
-                            Field completedWorkfield = workItem.Fields[TFSLiterals.CompletedWork];
-                            childItem.TaskEffortDetails.CompletedWork = (double)completedWorkfield.Value;
-
-                            Field remainingWorkfield = workItem.Fields[TFSLiterals.RemainingWork];
-                            childItem.TaskEffortDetails.RemainingWork = (double)remainingWorkfield.Value;
-
-                            Field OriginalWorkfield = workItem.Fields[TFSLiterals.OriginalEstimate];
-                            childItem.TaskEffortDetails.OriginalEstimate = (double)OriginalWorkfield.Value;
-
-                            childItem.WorkItemUrl = tfsUrlPath + "/" + projectName + "/_workitems#_a=edit&id=" + workItem.Id;
-                            childItemCollection.ChildItems.Add(childItem);
-                        }
-                    }
-                }
+                Field completedWorkfield = workItem.Fields[TFSLiterals.CompletedWork];
+                childItem.TaskEffortDetails.CompletedWork = (double)completedWorkfield.Value;
             }
 
-            if (parentWorkItem != null && parentWorkItem.Type != null && parentWorkItem.Type.Name == "Task")
+            if (workItem.Fields.Contains(TFSLiterals.CompletedWork))
             {
-                ChildItem childItem = new ChildItem();
-                childItem.ItemId = parentWorkItem.Id;
-                childItem.IterationPath = parentWorkItem.IterationPath;
-                childItem.State = parentWorkItem.State;
-                childItem.Title = parentWorkItem.Title;
-
-                Field assignedToField = parentWorkItem.Fields[TFSLiterals.AssignedTo];
-                childItem.AssignedTo = (string)assignedToField.Value;
-
-                Field workItemTypeField = parentWorkItem.Fields[TFSLiterals.WorkItemType];
-                childItem.WorkItemType = (string)workItemTypeField.Value;
-
-                if (parentWorkItem.Fields.Contains(TFSLiterals.CompletedWork))
-                {
-                    Field completedWorkfield = parentWorkItem.Fields[TFSLiterals.CompletedWork];
-                    childItem.TaskEffortDetails.CompletedWork = (double)completedWorkfield.Value;
-                }
-
-                if (parentWorkItem.Fields.Contains(TFSLiterals.RemainingWork))
-                {
-                    Field remainingWorkfield = parentWorkItem.Fields[TFSLiterals.RemainingWork];
-                    childItem.TaskEffortDetails.RemainingWork = (double)remainingWorkfield.Value;
-                }
-
-                if (parentWorkItem.Fields.Contains(TFSLiterals.OriginalEstimate))
-                {
-                    Field OriginalWorkfield = parentWorkItem.Fields[TFSLiterals.OriginalEstimate];
-                    childItem.TaskEffortDetails.OriginalEstimate = (double)OriginalWorkfield.Value;
-                }
-
-                childItem.WorkItemUrl = tfsUrlPath + "/" + projectName + "/_workitems#_a=edit&id=" + parentWorkItem.Id;
-                childItemCollection.ChildItems.Add(childItem);
+                Field remainingWorkfield = workItem.Fields[TFSLiterals.RemainingWork];
+                childItem.TaskEffortDetails.RemainingWork = (double)remainingWorkfield.Value;
             }
 
-            return childItemCollection;
+            if (workItem.Fields.Contains(TFSLiterals.CompletedWork))
+            {
+                Field OriginalWorkfield = workItem.Fields[TFSLiterals.OriginalEstimate];
+                childItem.TaskEffortDetails.OriginalEstimate = (double)OriginalWorkfield.Value;
+            }
+
+            childItem.WorkItemUrl = tfsUrlPath + "/" + projectName + "/_workitems#_a=edit&id=" + workItem.Id;
+            return childItem;
         }
 
-        /// <summary>
-        /// Compiles the resolved or closed bugs.
-        /// </summary>
-        /// <param name="bugsResolvedQueryResult">The bugs resolved query result.</param>
-        /// <param name="bugsClosedQueryResult">The bugs closed query result.</param>
-        /// <param name="filter">The filter.</param>
-        /// <returns>Report Class</returns>
-        public Report CompileResolvedOrClosedBugs(QueryResult bugsResolvedQueryResult, QueryResult bugsClosedQueryResult, BurnRetrievalOptions filter)
-        {
-            Report bugsResolvedOrClosedReport = new Report();
-            foreach (var workItem in bugsResolvedQueryResult.Result)
-            {
-                var reportingItem = Reporting.ReportFactory.CreateItem(workItem);
-                bugsResolvedOrClosedReport.AllItems.Add(reportingItem);
-            }
-
-            foreach (var workItem in bugsClosedQueryResult.Result)
-            {
-                var reportingItem = Reporting.ReportFactory.CreateItem(workItem);
-                bugsResolvedOrClosedReport.AllItems.Add(reportingItem);
-            }
-
-            bugsResolvedOrClosedReport.FinalizeReport();
-            return bugsResolvedOrClosedReport;
-        }
+        #endregion
     }
 }

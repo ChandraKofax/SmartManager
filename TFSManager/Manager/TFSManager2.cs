@@ -82,11 +82,18 @@ namespace TFS
             return server.GetIterations(projectName, release);
         }
 
-
         public ReleaseVersionCollection GetReleases(string tfsUrlPath, string projectName)
         {
             this.Connect(tfsUrlPath, projectName);         
             return server.GetReleases(projectName);
+        }
+
+        public ChildItemCollection GetListOfWorkItems(string tfsUrlPath, string projectName, string[] workItemIds)
+        {
+            this.Connect(tfsUrlPath, projectName);
+            QueryResult result = server.Execute(QueryStore.GetListOfWorkItemsQuery(workItemIds), null, false);
+            ChildItemCollection ChildItemCollection = reportEngine.CompileListOfWorkItems(tfsUrlPath, projectName, result);
+            return ChildItemCollection;
         }
 
         private void Connect(string tfsUrlPath, string projectName)

@@ -50,6 +50,8 @@
   <ItemGroup>
     <Compile Include="BurnDetails.cs" />
     <Compile Include="BurnRetrievalOptions.cs" />
+    <Compile Include="Node1.cs" />
+    <Compile Include="Nodes.cs" />
     <Compile Include="Project.cs" />
     <Compile Include="WorkItem.cs" />
     <Compile Include="ChildItem.cs" />
