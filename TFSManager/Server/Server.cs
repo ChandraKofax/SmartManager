@@ -103,16 +103,38 @@ namespace TFS
             {
                 if (project.Name.Equals(projectName))
                 {
-                    foreach (Node node in project.IterationRootNodes)
+                    NodeInfo[] structures = css4.ListStructures(project.Uri.ToString());
+                    NodeInfo iterations = structures.FirstOrDefault(n => n.StructureType.Equals("ProjectLifecycle"));
+
+                    if (iterations != null)
                     {
-                        ReleaseVersion releaseVersion = new ReleaseVersion(node.Name);
-                        result.ReleaseVersions.Add(releaseVersion);
+                        XmlElement iterationsTree = css4.GetNodesXml(new[] { iterations.Uri }, true);
+                        XmlNodeList nodeList = iterationsTree.ChildNodes;
+                        XElement doc = XElement.Parse(nodeList[0].InnerXml);
+
+                        IEnumerable<XElement> elements = from node in doc.Elements("Node")
+                                                         select node;
+
+                        int nodesCount = elements.Count();
+                        foreach (XElement element in elements)
+                        {
+                            try
+                            {
+                                ReleaseVersion releaseVersion = new ReleaseVersion(element.Attribute("Name").Value);
+                                releaseVersion.StartDate = Convert.ToDateTime(element.Attribute("StartDate").Value);
+                                releaseVersion.EndDate = Convert.ToDateTime(element.Attribute("FinishDate").Value);
+                                result.ReleaseVersions.Add(releaseVersion);
+                            }
+                            catch { }
+                        }
                     }
 
                     break;
                 }
             }
 
+            List<ReleaseVersion> SortedList = result.ReleaseVersions.OrderBy(o => o.Release).ToList();
+            result.ReleaseVersions = SortedList;
             return result;
         }
 
@@ -129,60 +151,45 @@ namespace TFS
 
                     if (iterations != null)
                     {
-                        //XmlElement iterationsTree = css4.GetNodesXml(new[] { iterations.Uri }, true);
-                        //XmlNodeList nodeList = iterationsTree.ChildNodes;
-                        //XElement doc = XElement.Parse(nodeList[0].InnerXml);
+                        XmlElement iterationsTree = css4.GetNodesXml(new[] { iterations.Uri }, true);
+                        XmlNodeList nodeList = iterationsTree.ChildNodes;
+                        XElement doc = XElement.Parse(nodeList[0].InnerXml);
 
-                        //IEnumerable<XElement> elements = from node in doc.Elements("Node")
-                        //                                 select node;
+                        IEnumerable<XElement> elements = from node in doc.Elements("Node")
+                                                         select node;
 
-                        //int nodesCount = elements.Count();
-                        //foreach (XElement element in elements)
-                        //{
-                        //    IEnumerable<XElement> fields = from field in element.Elements() select field;
-                        //    foreach (XElement field in fields)
-                        //    {
-                        //        IEnumerable<XElement> projectdetails = from detail in field.Elements() select detail;
-                        //        foreach (XElement detail in projectdetails)
-                        //        {
-                        //            try
-                        //            {
-                        //                Iteration iteration = new Iteration(item.Name);
-                        //                result.Iterations.Add(detail.Attribute("Name").Value, new IterationDates(detail.Attribute("StartDate").Value, detail.Attribute("FinishDate").Value));
-                        //            }
-                        //            catch { }
-                        //        }
-                        //    }
-                        //}
-                    }
-
-                    foreach (Node node in project.IterationRootNodes)
-                    {
-                        if (release == node.Name)
+                        int nodesCount = elements.Count();
+                        foreach (XElement element in elements)
                         {
-                            RecursiveAddIterationPath(node, result);
-                            break;
+                            if (element.Attribute("Name").Value.Equals(release))
+                            {
+                                IEnumerable<XElement> fields = from field in element.Elements() select field;
+                                foreach (XElement field in fields)
+                                {
+                                    IEnumerable<XElement> projectdetails = from detail in field.Elements() select detail;
+                                    foreach (XElement detail in projectdetails)
+                                    {
+                                        try
+                                        {
+                                            Iteration iteration = new Iteration(detail.Attribute("Name").Value);
+                                            iteration.StartDate = Convert.ToDateTime(detail.Attribute("StartDate").Value);
+                                            iteration.EndDate = Convert.ToDateTime(detail.Attribute("FinishDate").Value);
+                                            result.Iterations.Add(iteration);
+                                        }
+                                        catch { }
+                                    }
+                                }
+
+                                break;
+                            }
                         }
                     }
-
-                    break;
                 }
             }
 
+            List<Iteration> SortedList = result.Iterations.OrderBy(o => o.IterationPath).ToList();
+            result.Iterations = SortedList;
             return result;
-        }
-
-        private static void RecursiveAddIterationPath(Node node, IterationCollection result)
-        {
-            foreach (Node item in node.ChildNodes)
-            {
-                Iteration iteration = new Iteration(item.Name);
-                result.Iterations.Add(iteration);
-                if (item.HasChildNodes)
-                {
-                    RecursiveAddIterationPath(item, result);
-                }
-            }
         }
     }
 }
